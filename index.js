@@ -1,24 +1,29 @@
 const express = require('express')
 const app = express()
+var cors = require('cors')
 const port = 5000
-app.use(express.json()); // built-in middleware for express
-
 const { Pool, Client } = require('pg')
-
 require("dotenv").config();
 const postgresURL = process.env.postgresURL;
-
 const connectionString = postgresURL
 const pool = new Pool({
   connectionString,
 })
-
 const client = new Client({
   	connectionString: connectionString,
 	ssl: {
         rejectUnauthorized: false,
     },
 })
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+app.use(cors())
+
 client.connect()
 
 app.get('/', (req, res) => {
@@ -42,5 +47,5 @@ app.post('/get', (req, res) => {
 
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://0.0.0.0:${port}`)
+  console.log(`Server starting on port: ${port} ...`)
 })
