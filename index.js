@@ -19,22 +19,21 @@ const client = new Client({
     },
 })
 
-app.use(express.json()); // built-in middleware for express
+app.use(express.json());
+app.use(express.urlencoded({
+  extended: true
+}));
 // Add headers
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8888');
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
     // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
 
     // Pass to next layer of middleware
     next();
@@ -51,22 +50,34 @@ app.get('/', (req, res) => {
 
 //Post req
 
-app.post('/save', (req, res) => {
-	console.log(req.body)
+app.post('/save', (request, response) => {
+	console.log(JSON.stringify(request.body))
 	client
-	  .query(`INSERT INTO coupon(options) VALUES ($1);`, [JSON.stringify(req.body)])
-	  .then(res => console.log(res.rows[0]))
+	  .query(`INSERT INTO coupon(options) VALUES ($1) RETURNING id;`, [JSON.stringify(request.body)])
+	  .then(res => response.status(200).send(res.rows[0]))
 	  .catch(e => console.error(e.stack))
-	res.status(200).send('ok')
+
+	
 })
 
-app.post('/get', (req, res) => {
-	const { id } = req.body
-	console.log( id )
-	res.status(200).send('ok')
+app.post('/get', (request, response) => {
+	const { id } = request.body
+	client
+	  .query(`SELECT options FROM coupon WHERE id = ${id};`)
+	  .then(res => response.status(200).json(res.rows[0]))
+	  .catch(e => console.error(e.stack))
+
+})
+
+app.post('/del', (request, response) => {
+	const { id } = request.body
+	client
+	  .query(`DELETE FROM coupon WHERE id = ${id};`)
+	  .then(res => response.status(200).send('ok'))
+	  .catch(e => console.error(e.stack))
 })
 
 
-app.listen(process.env.PORT || 3000, function(){
+app.listen(process.env.PORT || port, function(){
   console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
 });
