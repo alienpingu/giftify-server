@@ -14,19 +14,12 @@ const pool = new Pool({
 })
 
 const client = new Client({
-  	connectionString: connectionString,
-	ssl: {
-        rejectUnauthorized: false,
-    },
+  	connectionString: connectionString
 })
 client.connect()
 
 app.get('/', (req, res) => {
-	client
-	  .query('SELECT * from coupon')
-	  .then(res => console.log(res.rows[0]))
-	  .catch(e => console.error(e.stack))
-
+		res.status(200).send('Giftify Server')
 })
 
 app.post('/save', (req, res) => {
@@ -46,5 +39,5 @@ app.post('/get', (req, res) => {
 
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://0.0.0.0:${port}`)
+  console.log(`Giftify server start on  PORT: ${port}`)
 })
