@@ -14,12 +14,15 @@ const pool = new Pool({
 })
 
 const client = new Client({
-  	connectionString: connectionString
+  	connectionString: connectionString,
+	ssl: {
+        rejectUnauthorized: false,
+    },
 })
 client.connect()
 
 app.get('/', (req, res) => {
-		res.status(200).send('Giftify Server')
+	res.status(200).send('ok')
 })
 
 app.post('/save', (req, res) => {
@@ -39,5 +42,5 @@ app.post('/get', (req, res) => {
 
 
 app.listen(port, () => {
-  console.log(`Giftify server start on  PORT: ${port}`)
+  console.log(`Example app listening at http://0.0.0.0:${port}`)
 })
